@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대한민국 미세먼지 예측</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>대한민국 미세먼지 예측 시스템</h1>
+            <p class="subtitle">머신러닝 기반 24시간 예측</p>
+        </header>
+
+        <div class="city-selector">
+            <label for="city">도시 선택:</label>
+            <select id="city" onchange="loadCityData()">
+                {% for city in cities %}
+                <option value="{{ city }}">{{ city }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="current-status">
+            <div class="status-card" id="current-card">
+                <h2>현재 대기질</h2>
+                <div class="grade-badge" id="grade-badge">-</div>
+                <div class="metrics">
+                    <div class="metric">
+                        <span class="label">PM10</span>
+                        <span class="value" id="current-pm10">-</span>
+                        <span class="unit">µg/m³</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">PM2.5</span>
+                        <span class="value" id="current-pm25">-</span>
+                        <span class="unit">µg/m³</span>
+                    </div>
+                </div>
+                <div class="weather-info">
+                    <span id="temperature">-°C</span>
+                    <span id="humidity">-%</span>
+                    <span id="wind-speed">-m/s</span>
+                </div>
+                <div class="timestamp" id="current-time">-</div>
+            </div>
+        </div>
+
+        <div class="forecast-section">
+            <h2>24시간 예측</h2>
+            <div class="chart-container">
+                <canvas id="forecast-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="forecast-table">
+            <h2>시간별 상세 예측</h2>
+            <div class="table-wrapper">
+                <table id="forecast-table">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>PM10</th>
+                            <th>PM2.5</th>
+                            <th>등급</th>
+                        </tr>
+                    </thead>
+                    <tbody id="forecast-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grade-legend">
+            <h3>대기질 등급 기준</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="dot good"></span>
+                    <span>좋음 (PM10: 0-30, PM2.5: 0-15)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="dot moderate"></span>
+                    <span>보통 (PM10: 31-80, PM2.5: 16-35)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="dot bad"></span>
+                    <span>나쁨 (PM10: 81-150, PM2.5: 36-75)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="dot very-bad"></span>
+                    <span>매우나쁨 (PM10: 151+, PM2.5: 76+)</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>ML 모델: RandomForest + XGBoost + LightGBM 앙상블</p>
+        </footer>
+    </div>
+
+    <script>
+        let forecastChart = null;
+
+        async function loadCityData() {
+            const city = document.getElementById('city').value;
+            await Promise.all([
+                loadCurrentData(city),
+                loadPrediction(city)
+            ]);
+        }
+
+        async function loadCurrentData(city) {
+            try {
+                const response = await fetch(`/api/current/${encodeURIComponent(city)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+
+                document.getElementById('current-pm10').textContent = data.pm10;
+                document.getElementById('current-pm25').textContent = data.pm25;
+                document.getElementById('temperature').textContent = `${data.temperature}°C`;
+                document.getElementById('humidity').textContent = `${data.humidity}%`;
+                document.getElementById('wind-speed').textContent = `${data.wind_speed}m/s`;
+
+                const badge = document.getElementById('grade-badge');
+                badge.textContent = data.grade;
+                badge.className = `grade-badge ${data.grade_class}`;
+
+                const card = document.getElementById('current-card');
+                card.className = `status-card ${data.grade_class}`;
+
+                const time = new Date(data.timestamp);
+                document.getElementById('current-time').textContent =
+                    time.toLocaleString('ko-KR');
+            } catch (error) {
+                console.error('Error loading current data:', error);
+            }
+        }
+
+        async function loadPrediction(city) {
+            try {
+                const response = await fetch(`/api/predict/${encodeURIComponent(city)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+
+                updateChart(data.predictions);
+                updateTable(data.predictions);
+            } catch (error) {
+                console.error('Error loading predictions:', error);
+            }
+        }
+
+        function updateChart(predictions) {
+            const ctx = document.getElementById('forecast-chart').getContext('2d');
+
+            const labels = predictions.map(p => p.time_label);
+            const pm10Data = predictions.map(p => p.pm10);
+            const pm25Data = predictions.map(p => p.pm25);
+
+            if (forecastChart) {
+                forecastChart.destroy();
+            }
+
+            forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'PM10',
+                            data: pm10Data,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'PM2.5',
+                            data: pm25Data,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'µg/m³'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '시간'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTable(predictions) {
+            const tbody = document.getElementById('forecast-tbody');
+            tbody.innerHTML = '';
+
+            predictions.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${p.time_label}</td>
+                    <td>${p.pm10}</td>
+                    <td>${p.pm25}</td>
+                    <td><span class="table-badge ${p.grade_class}">${p.grade}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 페이지 로드 시 초기 데이터 로드
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCityData();
+        });
+    </script>
+</body>
+</html>

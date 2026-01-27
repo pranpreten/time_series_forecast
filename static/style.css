@@ -1,0 +1,330 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    padding: 30px 0;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: #888;
+    font-size: 1.1rem;
+}
+
+.city-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.city-selector label {
+    font-size: 1.1rem;
+}
+
+.city-selector select {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    background: #2d3748;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.city-selector select:hover {
+    background: #3d4758;
+}
+
+.current-status {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.status-card {
+    background: #2d3748;
+    border-radius: 20px;
+    padding: 30px 50px;
+    text-align: center;
+    min-width: 350px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.status-card.good {
+    border: 2px solid #27ae60;
+    box-shadow: 0 10px 40px rgba(39, 174, 96, 0.2);
+}
+
+.status-card.moderate {
+    border: 2px solid #f39c12;
+    box-shadow: 0 10px 40px rgba(243, 156, 18, 0.2);
+}
+
+.status-card.bad {
+    border: 2px solid #e74c3c;
+    box-shadow: 0 10px 40px rgba(231, 76, 60, 0.2);
+}
+
+.status-card.very-bad {
+    border: 2px solid #8e44ad;
+    box-shadow: 0 10px 40px rgba(142, 68, 173, 0.2);
+}
+
+.status-card h2 {
+    margin-bottom: 20px;
+    color: #aaa;
+    font-weight: normal;
+}
+
+.grade-badge {
+    display: inline-block;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.grade-badge.good {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.grade-badge.moderate {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+    color: #333;
+}
+
+.grade-badge.bad {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.grade-badge.very-bad {
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+}
+
+.metrics {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 20px;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric .label {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.metric .value {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.metric .unit {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.weather-info {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    color: #888;
+    margin-bottom: 15px;
+}
+
+.timestamp {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.forecast-section {
+    background: #2d3748;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.forecast-section h2 {
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.chart-container {
+    height: 300px;
+}
+
+.forecast-table {
+    background: #2d3748;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.forecast-table h2 {
+    margin-bottom: 20px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #3d4758;
+}
+
+th {
+    background: #1a1a2e;
+    position: sticky;
+    top: 0;
+}
+
+tr:hover {
+    background: #3d4758;
+}
+
+.table-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.table-badge.good {
+    background: #27ae60;
+}
+
+.table-badge.moderate {
+    background: #f39c12;
+    color: #333;
+}
+
+.table-badge.bad {
+    background: #e74c3c;
+}
+
+.table-badge.very-bad {
+    background: #8e44ad;
+}
+
+.grade-legend {
+    background: #2d3748;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.grade-legend h3 {
+    margin-bottom: 15px;
+    color: #aaa;
+    font-weight: normal;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.dot.good {
+    background: #27ae60;
+}
+
+.dot.moderate {
+    background: #f39c12;
+}
+
+.dot.bad {
+    background: #e74c3c;
+}
+
+.dot.very-bad {
+    background: #8e44ad;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .status-card {
+        min-width: auto;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .metrics {
+        gap: 20px;
+    }
+
+    .metric .value {
+        font-size: 1.8rem;
+    }
+
+    .legend-items {
+        flex-direction: column;
+    }
+}
